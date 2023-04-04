@@ -23,18 +23,12 @@ func Render(in io.Reader, out io.Writer) error {
 
 	wasi_snapshot_preview1.MustInstantiate(ctx, r)
 
-	code, err := r.CompileModule(ctx, dotWasm)
-	if err != nil {
-		return err
-	}
-
 	// Only stdin and stdout is exposed to the WASM module
 	config := wazero.NewModuleConfig().WithStdout(out).WithStdin(in).WithArgs("dot", "-Tsvg", "-Kdot")
 
-	_, _ = r.InstantiateModule(ctx, code, config)
-	// Weird but above ^^ always returns error
+	_, err := r.InstantiateWithConfig(ctx, dotWasm, config)
 
-	return nil
+	return err
 }
 
 // RenderString converts input graph into output SVG figure.
